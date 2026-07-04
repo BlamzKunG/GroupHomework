@@ -140,8 +140,11 @@
           <select id="active-group-select" class="custom-select">
             <!-- Populated by JavaScript -->
           </select>
-          <button id="add-group-btn" class="icon-btn-accent" title="สร้างกลุ่มใหม่">
-            <i class="fa-solid fa-plus"></i>
+          <button id="add-group-btn" class="btn btn-primary" style="padding: 4px 12px; font-size: 0.8rem; height: 32px; border-radius: var(--radius-sm); margin-left: 4px;" title="สร้างกลุ่มใหม่">
+            <i class="fa-solid fa-plus-circle"></i> สร้างกลุ่ม
+          </button>
+          <button id="delete-group-btn" class="icon-btn-danger" style="margin-left: 6px;" title="ลบกลุ่มนี้">
+            <i class="fa-regular fa-trash-can"></i>
           </button>
           <button id="open-group-chat-btn" class="icon-btn-accent" title="แชทกลุ่ม" style="margin-left: 6px; background: rgba(139, 92, 246, 0.2); color: #c084fc;">
             <i class="fa-regular fa-comments"></i>
@@ -480,7 +483,7 @@
 
   <!-- ADD GROUP/ROOM MODAL -->
   <div class="modal-overlay" id="group-modal">
-    <div class="modal-card small-modal">
+    <div class="modal-card">
       <div class="modal-header">
         <h2>สร้างกลุ่มทำการบ้านใหม่</h2>
         <button class="close-btn" id="close-group-modal-btn"><i class="fa-solid fa-xmark"></i></button>
@@ -489,6 +492,12 @@
         <div class="form-group">
           <label for="group-name-input">ชื่อกลุ่ม/ห้องเรียน *</label>
           <input type="text" id="group-name-input" required placeholder="เช่น ม.6/2 สายวิทย์, กลุ่มติวเลข สระบุรี">
+        </div>
+        <div class="form-group">
+          <label>เลือกสมาชิกในกลุ่ม (เฉพาะสมาชิกที่เลือกจะมองเห็นกลุ่มและงานในกลุ่มนี้)</label>
+          <div class="checkbox-group" id="group-members-checkboxes">
+            <!-- Populated dynamically via JS -->
+          </div>
         </div>
         <div class="modal-footer">
           <button type="button" class="btn btn-text" id="cancel-group-btn">ยกเลิก</button>
@@ -747,6 +756,8 @@
   <!-- Global Toast Notification Container -->
   <div class="toast-container" id="toast-container"></div>
 
+  <!-- Socket.io client -->
+  <script src="/socket.io/socket.io.js"></script>
   <!-- Application logic -->
   <script src="app.js?v=1.2.0"></script>
 </body>

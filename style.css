@@ -173,6 +173,7 @@ body {
   width: 100%;
 }
 
+
 .icon-btn-accent {
   background: rgba(20, 184, 166, 0.06);
   border: 1px solid rgba(20, 184, 166, 0.12);
@@ -188,6 +189,24 @@ body {
 }
 .icon-btn-accent:hover {
   background: var(--secondary);
+  color: #fff;
+}
+
+.icon-btn-danger {
+  background: rgba(244, 63, 94, 0.08);
+  border: 1px solid rgba(244, 63, 94, 0.15);
+  color: var(--priority-high);
+  width: 32px;
+  height: 32px;
+  border-radius: var(--radius-sm);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: var(--transition-fast);
+}
+.icon-btn-danger:hover {
+  background: var(--priority-high);
   color: #fff;
 }
 
@@ -921,11 +940,12 @@ body {
   gap: 8px;
 }
 .hw-subject-badge {
-  font-size: 0.75rem;
-  font-weight: 700;
-  padding: 2px 8px;
-  border-radius: 4px;
+  font-size: 0.85rem;
+  font-weight: 800;
+  padding: 4px 10px;
+  border-radius: 6px;
   text-transform: uppercase;
+  letter-spacing: 0.5px;
 }
 .hw-prio-dot {
   width: 6px;
@@ -1483,13 +1503,14 @@ body {
 .detail-subject-tag {
   background: var(--bg-subject, var(--primary));
   color: white;
-  font-size: 0.8rem;
-  font-weight: 700;
-  padding: 4px 12px;
-  border-radius: 4px;
+  font-size: 0.95rem;
+  font-weight: 800;
+  padding: 6px 14px;
+  border-radius: 6px;
   text-transform: uppercase;
   z-index: 1;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+  letter-spacing: 0.5px;
 }
 .close-btn-white {
   background: rgba(255, 255, 255, 0.1);

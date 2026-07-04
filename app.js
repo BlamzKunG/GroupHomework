@@ -66,7 +66,7 @@ async function loadDataFromServer() {
   try {
     const [users, groups, subjects, homeworks, activities] = await Promise.all([
       fetch('/api/users').then(r => r.json()),
-      fetch('/api/groups').then(r => r.json()),
+      fetch(`/api/groups?userId=${state.loggedInUserId || ''}`).then(r => r.json()),
       fetch('/api/subjects').then(r => r.json()),
       fetch('/api/homeworks').then(r => r.json()),
       fetch('/api/activities').then(r => r.json())
@@ -95,15 +95,15 @@ async function loadDataFromServer() {
   }
 }
 
-// Real-time synchronization check (Runs every 4 seconds)
-async function syncDataFromServer() {
+// Real-time synchronization check (Runs manually or via WebSocket updates)
+async function syncDataFromServer(eventData = { type: 'all' }) {
   if (!state.loggedInUserId) return;
 
   try {
     // Perform parallel quick fetch checks
     const [users, groups, homeworks, activities] = await Promise.all([
       fetch('/api/users').then(r => r.json()),
-      fetch('/api/groups').then(r => r.json()),
+      fetch(`/api/groups?userId=${state.loggedInUserId || ''}`).then(r => r.json()),
       fetch('/api/homeworks').then(r => r.json()),
       fetch('/api/activities').then(r => r.json())
     ]);
@@ -168,7 +168,7 @@ async function syncDataFromServer() {
     }
 
     // 5. If details modal is open, sync comment messages
-    if (state.activeHomeworkId) {
+    if (state.activeHomeworkId && (eventData.type === 'chats' || eventData.type === 'all')) {
       const chats = await fetch(`/api/chats/${state.activeHomeworkId}`).then(r => r.json());
       const chatsStr = JSON.stringify(chats);
       if (chatsStr !== cache.chatsStr) {
@@ -178,7 +178,7 @@ async function syncDataFromServer() {
     }
 
     // 6. If group chat modal is open, sync group messages
-    if (state.groupChatOpen && state.activeGroupId) {
+    if (state.groupChatOpen && state.activeGroupId && (eventData.type === 'chats' || eventData.type === 'all')) {
       const chats = await fetch(`/api/chats/${state.activeGroupId}`).then(r => r.json());
       const chatsStr = JSON.stringify(chats);
       if (chatsStr !== cache.groupChatsStr) {
@@ -190,6 +190,59 @@ async function syncDataFromServer() {
   } catch (error) {
     console.warn('Sync connection timed out. Retrying in next cycle...');
   }
+}
+
+// WebSocket connection setup
+let socket;
+function initSocketConnection() {
+  if (typeof io === 'undefined') {
+    console.warn('Socket.io client library not loaded');
+    return;
+  }
+  socket = io();
+  socket.on('connect', () => {
+    console.log('Connected to WebSocket server');
+  });
+  socket.on('update', (data) => {
+    syncDataFromServer(data);
+  });
+}
+
+// Notifications storage and logic helpers
+function loadNotificationsFromStorage() {
+  if (!state.loggedInUserId) {
+    state.notifs = [];
+    return;
+  }
+  const saved = localStorage.getItem(`hwspace_notifs_${state.loggedInUserId}`);
+  if (saved) {
+    try {
+      state.notifs = JSON.parse(saved);
+    } catch (e) {
+      state.notifs = [];
+    }
+  } else {
+    state.notifs = [];
+  }
+}
+
+function saveNotificationsToStorage() {
+  if (!state.loggedInUserId) return;
+  localStorage.setItem(`hwspace_notifs_${state.loggedInUserId}`, JSON.stringify(state.notifs));
+}
+
+function addNotification(title, desc, hwId) {
+  const newNotif = {
+    id: 'notif_' + Date.now() + '_' + Math.floor(Math.random() * 100),
+    title,
+    desc,
+    hwId,
+    timestamp: new Date().toISOString(),
+    unread: true
+  };
+  state.notifs.unshift(newNotif);
+  saveNotificationsToStorage();
+  renderNotifications();
 }
 
 // Compare current and previous homework sets to notify users of additions
@@ -593,7 +646,7 @@ function renderKanbanBoard() {
            data-id="${hw.id}" 
            id="card-${hw.id}">
         <div class="hw-card-header">
-          <span class="hw-subject-badge" style="background-color: rgba(${hexToRgb(subject.color)}, 0.12); color: ${subject.color};">
+          <span class="hw-subject-badge" style="background-color: rgba(${hexToRgb(subject.color)}, 0.2); color: ${subject.color};">
             ${subject.name}
           </span>
           <span class="hw-prio-dot ${hw.priority}" title="ความสำคัญ: ${hw.priority}"></span>
@@ -901,10 +954,70 @@ function setupModalButtons() {
   // Add Group modal
   document.getElementById('add-group-btn').addEventListener('click', () => {
     document.getElementById('group-form').reset();
+    
+    // Populate group members list
+    const membersContainer = document.getElementById('group-members-checkboxes');
+    if (membersContainer) {
+      membersContainer.innerHTML = state.users.map(u => {
+        const isMe = u.id === state.loggedInUserId;
+        return `
+          <label class="checkbox-item ${isMe ? 'checked' : ''}" id="grp-chk-label-${u.id}">
+            <input type="checkbox" name="group-members-check" value="${u.id}" ${isMe ? 'checked disabled' : ''}>
+            <span>${u.name}</span>
+          </label>
+        `;
+      }).join('');
+      
+      membersContainer.querySelectorAll('input[type="checkbox"]').forEach(chk => {
+        chk.addEventListener('change', () => {
+          const label = document.getElementById(`grp-chk-label-${chk.value}`);
+          if (label) {
+            label.classList.toggle('checked', chk.checked);
+          }
+        });
+      });
+    }
+
     openModal('group-modal');
   });
   document.getElementById('close-group-modal-btn').addEventListener('click', () => closeModal('group-modal'));
   document.getElementById('cancel-group-btn').addEventListener('click', () => closeModal('group-modal'));
+
+  // Delete Group
+  const deleteGroupBtn = document.getElementById('delete-group-btn');
+  if (deleteGroupBtn) {
+    deleteGroupBtn.addEventListener('click', async () => {
+      if (!state.activeGroupId) {
+        showToast('ลบกลุ่มไม่สำเร็จ', 'กรุณาเลือกกลุ่มที่ต้องการลบก่อน', 'warning');
+        return;
+      }
+      
+      const group = state.groups.find(g => g.id === state.activeGroupId);
+      if (!group) return;
+
+      if (confirm(`⚠️ คุณแน่ใจหรือไม่ว่าต้องการลบกลุ่ม "${group.name}"?\nการบ้าน แชทกลุ่ม และความเคลื่อนไหวทั้งหมดในกลุ่มนี้จะถูกลบถาวร!`)) {
+        try {
+          const res = await fetch(`/api/groups/${state.activeGroupId}`, { method: 'DELETE' });
+          if (res.ok) {
+            state.groups = state.groups.filter(g => g.id !== state.activeGroupId);
+            cache.groupsStr = JSON.stringify(state.groups);
+            
+            showToast('ลบกลุ่มเรียนแล้ว', `ลบกลุ่ม "${group.name}" เรียบร้อยแล้ว`, 'danger');
+            
+            state.activeGroupId = state.groups.length > 0 ? state.groups[0].id : null;
+            
+            populateDropdowns();
+            renderKanbanBoard();
+            renderSidebar();
+          } else {
+            showToast('ลบล้มเหลว', 'เกิดข้อผิดพลาดจากเซิร์ฟเวอร์', 'danger');
+          }
+        } catch (err) {
+          showToast('เกิดข้อผิดพลาด', 'ไม่สามารถเชื่อมต่อเซิร์ฟเวอร์ได้', 'danger');
+        }
+      }
+    });
+  }
 
   // Detail view modal
   document.getElementById('close-detail-modal-btn').addEventListener('click', () => {
@@ -1502,6 +1615,8 @@ function enterAppView() {
   document.getElementById('auth-view').classList.add('hidden');
   document.getElementById('app-view').classList.remove('hidden');
   
+  loadNotificationsFromStorage();
+  
   populateDropdowns();
   updateNavbarUserProfile();
   renderKanbanBoard();
@@ -1512,6 +1627,8 @@ function enterAppView() {
 function exitAppView() {
   document.getElementById('app-view').classList.add('hidden');
   document.getElementById('auth-view').classList.remove('hidden');
+  
+  state.notifs = [];
   
   document.getElementById('login-form').reset();
   document.getElementById('register-form').reset();
@@ -1749,11 +1866,19 @@ function setupFormSubmitListeners() {
     e.preventDefault();
     const name = document.getElementById('group-name-input').value.trim();
 
+    const checkboxes = document.getElementsByName('group-members-check');
+    const members = [];
+    checkboxes.forEach(chk => {
+      if (chk.checked || chk.value === state.loggedInUserId) {
+        members.push(chk.value);
+      }
+    });
+
     try {
       const res = await fetch('/api/groups', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ name })
+        body: JSON.stringify({ name, members })
       });
 
       if (res.ok) {
@@ -1980,6 +2105,9 @@ window.addEventListener('DOMContentLoaded', async () => {
   // Start background engines
   startDeadlineRemindersEngine();
   
-  // Start server polling synchronizer (every 4 seconds)
-  setInterval(syncDataFromServer, 4000);
+  // Start WebSocket client connection
+  initSocketConnection();
+  
+  // Start server polling synchronizer (every 30 seconds as fallback)
+  setInterval(() => syncDataFromServer({ type: 'all' }), 30000);
 });
