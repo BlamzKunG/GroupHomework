@@ -1,0 +1,707 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>HomeworkSpace - จดการบ้านและแชร์กับเพื่อน</title>
+  
+  <!-- Google Fonts: Outfit & IBM Plex Sans Thai for support Thai Language nicely -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Thai:wght@300;400;500;600;700&family=Outfit:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+  
+  <!-- FontAwesome Icons for clean UI elements -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  
+  <!-- Main stylesheet -->
+  <link rel="stylesheet" href="style.css?v=1.0.3">
+
+</head>
+<body>
+  <!-- Background Ambient Lights -->
+  <div class="ambient-glow glow-1"></div>
+  <div class="ambient-glow glow-2"></div>
+
+  <!-- AUTHENTICATION VIEW (Login / Register) -->
+  <div id="auth-view" class="auth-overlay">
+    <div class="auth-card">
+      <div class="auth-logo">
+        <i class="fa-solid fa-graduation-cap auth-logo-icon"></i>
+        <span>Homework<span>Space</span></span>
+      </div>
+      <p class="auth-subtitle">ระบบจดการบ้านกลุ่ม ตรวจสอบกำหนดส่ง และแชร์ความรู้ร่วมกับเพื่อน</p>
+
+      <!-- Auth Tabs -->
+      <div class="auth-tabs">
+        <button class="auth-tab-btn active" id="tab-login-btn">เข้าสู่ระบบ</button>
+        <button class="auth-tab-btn" id="tab-register-btn">สมัครสมาชิก</button>
+      </div>
+
+      <!-- Login Form -->
+      <form id="login-form" class="auth-form">
+        <div class="form-group">
+          <label for="login-username">ชื่อผู้ใช้งาน (Username) *</label>
+          <div class="input-icon-wrapper">
+            <i class="fa-regular fa-user"></i>
+            <input type="text" id="login-username" required placeholder="เช่น apinya_dev">
+          </div>
+        </div>
+        <div class="form-group">
+          <label for="login-password">รหัสผ่าน (Password) *</label>
+          <div class="input-icon-wrapper">
+            <i class="fa-solid fa-lock"></i>
+            <input type="password" id="login-password" required placeholder="••••••••">
+          </div>
+        </div>
+        <button type="submit" class="btn btn-primary btn-block">
+          <i class="fa-solid fa-right-to-bracket"></i> เข้าสู่ระบบ
+        </button>
+      </form>
+
+      <!-- Register Form (Hidden by default) -->
+      <form id="register-form" class="auth-form hidden">
+        <div class="form-group">
+          <label for="register-username">ชื่อผู้ใช้งาน (Username) *</label>
+          <div class="input-icon-wrapper">
+            <i class="fa-regular fa-user"></i>
+            <input type="text" id="register-username" required placeholder="ภาษาอังกฤษ ตัวเลข หรือขีดล่าง">
+          </div>
+        </div>
+        
+        <div class="form-row">
+          <div class="form-group col-6">
+            <label for="register-name">ชื่อเล่น / ชื่อแสดงในกลุ่ม *</label>
+            <input type="text" id="register-name" required placeholder="เช่น อภิญญา">
+          </div>
+          <div class="form-group col-6">
+            <label for="register-password">รหัสผ่าน *</label>
+            <input type="password" id="register-password" required placeholder="รหัสผ่านขั้นต่ำ 4 ตัว">
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label>เลือกสีประจำตัว (Avatar Color)</label>
+          <div class="color-picker-grid" id="register-color-picker">
+            <label class="color-dot-wrapper">
+              <input type="radio" name="reg-avatar-color" value="#8b5cf6" checked>
+              <span class="color-dot" style="background-color: #8b5cf6;"></span>
+            </label>
+            <label class="color-dot-wrapper">
+              <input type="radio" name="reg-avatar-color" value="#10b981">
+              <span class="color-dot" style="background-color: #10b981;"></span>
+            </label>
+            <label class="color-dot-wrapper">
+              <input type="radio" name="reg-avatar-color" value="#3b82f6">
+              <span class="color-dot" style="background-color: #3b82f6;"></span>
+            </label>
+            <label class="color-dot-wrapper">
+              <input type="radio" name="reg-avatar-color" value="#ec4899">
+              <span class="color-dot" style="background-color: #ec4899;"></span>
+            </label>
+            <label class="color-dot-wrapper">
+              <input type="radio" name="reg-avatar-color" value="#f59e0b">
+              <span class="color-dot" style="background-color: #f59e0b;"></span>
+            </label>
+            <label class="color-dot-wrapper">
+              <input type="radio" name="reg-avatar-color" value="#f43f5e">
+              <span class="color-dot" style="background-color: #f43f5e;"></span>
+            </label>
+            <label class="color-dot-wrapper">
+              <input type="radio" name="reg-avatar-color" value="#06b6d4">
+              <span class="color-dot" style="background-color: #06b6d4;"></span>
+            </label>
+            <label class="color-dot-wrapper">
+              <input type="radio" name="reg-avatar-color" value="#84cc16">
+              <span class="color-dot" style="background-color: #84cc16;"></span>
+            </label>
+          </div>
+        </div>
+
+        <button type="submit" class="btn btn-primary btn-block">
+          <i class="fa-solid fa-user-plus"></i> สมัครสมาชิก & เข้าใช้งาน
+        </button>
+      </form>
+    </div>
+  </div>
+
+  <!-- MAIN APP VIEW (Hidden until Login) -->
+  <div id="app-view" class="hidden">
+    <!-- Navigation Bar -->
+    <nav class="navbar">
+      <div class="nav-container">
+        <div class="logo">
+          <i class="fa-solid fa-graduation-cap logo-icon"></i>
+          <span>Homework<span>Space</span></span>
+        </div>
+        
+        <!-- Group / Room Switcher -->
+        <div class="group-selector">
+          <label for="active-group-select"><i class="fa-solid fa-users"></i> กลุ่ม:</label>
+          <select id="active-group-select" class="custom-select">
+            <!-- Populated by JavaScript -->
+          </select>
+          <button id="add-group-btn" class="icon-btn-accent" title="สร้างกลุ่มใหม่">
+            <i class="fa-solid fa-plus"></i>
+          </button>
+        </div>
+
+        <!-- Right Nav Controls -->
+        <div class="nav-controls">
+          <!-- Notification Bell -->
+          <div class="notification-bell-container" id="notif-bell-btn">
+            <i class="fa-regular fa-bell"></i>
+            <span class="badge" id="notif-count">0</span>
+            
+            <!-- Dropdown Notifications list -->
+            <div class="notif-dropdown" id="notif-dropdown">
+              <div class="notif-header">
+                <h3>การแจ้งเตือนการบ้าน</h3>
+                <button id="clear-notif-btn">ล้างทั้งหมด</button>
+              </div>
+              <div class="notif-list" id="notif-list">
+                <div class="empty-notif">ไม่มีการแจ้งเตือนในขณะนี้</div>
+              </div>
+            </div>
+          </div>
+          
+          <!-- User Profile & Logged In controls -->
+          <div class="logged-in-profile" id="user-profile-menu-btn">
+            <div class="user-avatar" id="current-user-avatar">
+              <!-- Rendered by JS -->
+            </div>
+            <span class="profile-name" id="current-user-name">Loading...</span>
+            <i class="fa-solid fa-chevron-down profile-dropdown-icon"></i>
+            
+            <!-- Profile Dropdown options -->
+            <div class="profile-dropdown" id="profile-dropdown">
+              <button id="manage-account-btn-dropdown"><i class="fa-regular fa-id-card"></i> ตั้งค่าบัญชี</button>
+              <button id="logout-btn-dropdown" class="danger-item"><i class="fa-solid fa-arrow-right-from-bracket"></i> ออกจากระบบ</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </nav>
+
+    <!-- Main Container -->
+    <main class="app-container">
+      
+      <!-- Top Dashboard Header with Statistics -->
+      <header class="dashboard-header">
+        <div class="dashboard-intro">
+          <h1 id="group-title">กลุ่มเรียนพิเศษ ม.6/1</h1>
+          <p class="subtitle" id="dashboard-user-greeting">จดการบ้าน ร่วมมือกัน และทำเสร็จตรงเวลากับแก๊งเพื่อนของคุณ</p>
+        </div>
+        
+        <!-- Stats Board -->
+        <div class="stats-board">
+          <div class="stat-card">
+            <div class="stat-icon-wrapper blue">
+              <i class="fa-solid fa-list-check"></i>
+            </div>
+            <div class="stat-info">
+              <span class="stat-val" id="stat-pending">0</span>
+              <span class="stat-label">การบ้านที่ยังไม่เสร็จ</span>
+            </div>
+          </div>
+          
+          <div class="stat-card">
+            <div class="stat-icon-wrapper orange">
+              <i class="fa-solid fa-clock-rotate-left"></i>
+            </div>
+            <div class="stat-info">
+              <span class="stat-val" id="stat-urgent">0</span>
+              <span class="stat-label">ส่งเร็วๆ นี้ (ใน 48 ชม.)</span>
+            </div>
+          </div>
+
+          <div class="stat-card-progress">
+            <div class="progress-circle-container">
+              <svg class="progress-svg" viewBox="0 0 100 100">
+                <circle class="bg-circle" cx="50" cy="50" r="40"></circle>
+                <circle class="fg-circle" id="stat-progress-circle" cx="50" cy="50" r="40" stroke-dasharray="251.2" stroke-dashoffset="251.2"></circle>
+              </svg>
+              <div class="progress-text" id="stat-progress-percent">0%</div>
+            </div>
+            <div class="progress-details">
+              <span class="progress-header">เสร็จสมบูรณ์แล้ว</span>
+              <span class="progress-sub" id="stat-ratio">0 จาก 0 ชิ้น</span>
+            </div>
+          </div>
+        </div>
+      </header>
+
+      <!-- Toolbar / Search, Filter, Add Action -->
+      <section class="toolbar">
+        <div class="search-filter-wrapper">
+          <div class="search-box">
+            <i class="fa-solid fa-magnifying-glass"></i>
+            <input type="text" id="search-input" placeholder="ค้นหาการบ้าน...">
+          </div>
+          
+          <div class="filters">
+            <select id="filter-subject" class="custom-select-small">
+              <option value="all">ทุกวิชา</option>
+              <!-- Subjects will be dynamically added -->
+            </select>
+            
+            <select id="filter-priority" class="custom-select-small">
+              <option value="all">ทุกระดับความสำคัญ</option>
+              <option value="high">ความสำคัญสูง 🚨</option>
+              <option value="medium">ความสำคัญปานกลาง ⚠️</option>
+              <option value="low">ความสำคัญต่ำ 💤</option>
+            </select>
+
+            <select id="filter-assignee" class="custom-select-small">
+              <option value="all">ทุกคนที่ได้รับมอบหมาย</option>
+              <!-- Friends will be dynamically added -->
+            </select>
+          </div>
+        </div>
+
+        <button id="add-homework-btn" class="btn btn-primary">
+          <i class="fa-solid fa-plus-circle"></i> เพิ่มการบ้านใหม่
+        </button>
+      </section>
+
+      <!-- Main Workspace Layout -->
+      <section class="workspace-layout">
+        
+        <!-- Kanban Columns -->
+        <div class="kanban-board">
+          <!-- TO DO COLUMN -->
+          <div class="kanban-column" id="col-todo" data-status="todo">
+            <div class="column-header">
+              <div class="column-title-group">
+                <span class="status-indicator todo"></span>
+                <h2>ต้องทำ (To Do)</h2>
+              </div>
+              <span class="card-count" id="count-todo">0</span>
+            </div>
+            <div class="card-list" id="list-todo">
+              <!-- Homework cards injected here -->
+            </div>
+          </div>
+
+          <!-- IN PROGRESS COLUMN -->
+          <div class="kanban-column" id="col-progress" data-status="progress">
+            <div class="column-header">
+              <div class="column-title-group">
+                <span class="status-indicator progress"></span>
+                <h2>กำลังทำ (In Progress)</h2>
+              </div>
+              <span class="card-count" id="count-progress">0</span>
+            </div>
+            <div class="card-list" id="list-progress">
+              <!-- Homework cards injected here -->
+            </div>
+          </div>
+
+          <!-- DONE COLUMN -->
+          <div class="kanban-column" id="col-done" data-status="done">
+            <div class="column-header">
+              <div class="column-title-group">
+                <span class="status-indicator done"></span>
+                <h2>เสร็จแล้ว (Done)</h2>
+              </div>
+              <span class="card-count" id="count-done">0</span>
+            </div>
+            <div class="card-list" id="list-done">
+              <!-- Homework cards injected here -->
+            </div>
+          </div>
+        </div>
+
+        <!-- Right Sidebar (Leaderboard, Social Feed, Active Friends) -->
+        <aside class="sidebar">
+          <!-- Friends Online Section -->
+          <div class="sidebar-widget">
+            <h3><i class="fa-solid fa-circle-dot icon-green"></i> สมาชิกกลุ่มออนไลน์</h3>
+            <div class="active-friends-list" id="friends-list">
+              <!-- Rendered by JS -->
+            </div>
+          </div>
+
+          <!-- Contribution Leaderboard -->
+          <div class="sidebar-widget">
+            <h3><i class="fa-solid fa-trophy icon-yellow"></i> สถิติช่วยทำการบ้าน</h3>
+            <div class="leaderboard-list" id="leaderboard-list">
+              <!-- Rendered by JS -->
+            </div>
+          </div>
+
+          <!-- Activity Feed -->
+          <div class="sidebar-widget">
+            <h3><i class="fa-solid fa-clock-rotate-left"></i> ความเคลื่อนไหวในกลุ่ม</h3>
+            <div class="activity-feed" id="activity-feed">
+              <!-- Rendered by JS -->
+            </div>
+          </div>
+        </aside>
+      </section>
+    </main>
+  </div>
+
+  <!-- ADD / EDIT HOMEWORK MODAL -->
+  <div class="modal-overlay" id="homework-modal">
+    <div class="modal-card">
+      <div class="modal-header">
+        <h2 id="modal-title">จดการบ้านชิ้นใหม่</h2>
+        <button class="close-btn" id="close-homework-modal-btn"><i class="fa-solid fa-xmark"></i></button>
+      </div>
+      <form id="homework-form" class="modal-form">
+        <input type="hidden" id="homework-id-input">
+        
+        <div class="form-group">
+          <label for="hw-title">หัวข้อการบ้าน *</label>
+          <input type="text" id="hw-title" required placeholder="เช่น รายงานวิชาวิทยาศาสตร์, แบบฝึกหัดคณิตศาสตร์ หน้า 20">
+        </div>
+
+        <div class="form-row">
+          <div class="form-group col-6">
+            <label for="hw-subject">วิชา *</label>
+            <div class="subject-select-wrapper">
+              <select id="hw-subject" required>
+                <!-- Populated by JS -->
+              </select>
+              <button type="button" id="create-subject-btn" class="btn btn-secondary-icon" title="สร้างวิชาใหม่">
+                <i class="fa-solid fa-tags"></i>
+              </button>
+            </div>
+          </div>
+          
+          <div class="form-group col-6">
+            <label for="hw-priority">ความสำคัญ *</label>
+            <select id="hw-priority" required>
+              <option value="high">🚨 ความสำคัญสูง (ส่งด่วน)</option>
+              <option value="medium" selected>⚠️ ความสำคัญปานกลาง</option>
+              <option value="low">💤 ความสำคัญต่ำ (ส่งได้เรื่อยๆ)</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="form-row">
+          <div class="form-group col-6">
+            <label for="hw-due-date">วันที่กำหนดส่ง *</label>
+            <input type="date" id="hw-due-date" required>
+          </div>
+          
+          <div class="form-group col-6">
+            <label for="hw-due-time">เวลาส่ง *</label>
+            <input type="time" id="hw-due-time" value="08:30" required>
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label>มอบหมายให้เพื่อน (สามารถมอบหมายร่วมกันได้)</label>
+          <div class="checkbox-group" id="assignees-checkboxes">
+            <!-- Rendered by JS -->
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label for="hw-desc">รายละเอียดงาน / คำสั่งเพิ่มเติม</label>
+          <textarea id="hw-desc" rows="3" placeholder="เช่น ทำหน้า 1-5 เฉพาะข้อคี่, ส่งในลิงก์ Google Classroom นะครับ"></textarea>
+        </div>
+
+        <div class="modal-footer">
+          <button type="button" class="btn btn-text" id="cancel-homework-btn">ยกเลิก</button>
+          <button type="submit" class="btn btn-primary" id="save-homework-btn">บันทึกข้อมูลการบ้าน</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- ADD SUBJECT MODAL -->
+  <div class="modal-overlay" id="subject-modal">
+    <div class="modal-card small-modal">
+      <div class="modal-header">
+        <h2>เพิ่มวิชาใหม่</h2>
+        <button class="close-btn" id="close-subject-modal-btn"><i class="fa-solid fa-xmark"></i></button>
+      </div>
+      <form id="subject-form" class="modal-form">
+        <div class="form-group">
+          <label for="subj-name">ชื่อวิชา *</label>
+          <input type="text" id="subj-name" required placeholder="เช่น ชีววิทยา, ศิลปะ, ประวัติศาสตร์">
+        </div>
+        
+        <div class="form-group">
+          <label>เลือกสีประจำวิชา</label>
+          <div class="color-picker-grid">
+            <label class="color-dot-wrapper">
+              <input type="radio" name="subj-color" value="#f43f5e" checked>
+              <span class="color-dot" style="background-color: #f43f5e;"></span>
+            </label>
+            <label class="color-dot-wrapper">
+              <input type="radio" name="subj-color" value="#3b82f6">
+              <span class="color-dot" style="background-color: #3b82f6;"></span>
+            </label>
+            <label class="color-dot-wrapper">
+              <input type="radio" name="subj-color" value="#10b981">
+              <span class="color-dot" style="background-color: #10b981;"></span>
+            </label>
+            <label class="color-dot-wrapper">
+              <input type="radio" name="subj-color" value="#f59e0b">
+              <span class="color-dot" style="background-color: #f59e0b;"></span>
+            </label>
+            <label class="color-dot-wrapper">
+              <input type="radio" name="subj-color" value="#8b5cf6">
+              <span class="color-dot" style="background-color: #8b5cf6;"></span>
+            </label>
+            <label class="color-dot-wrapper">
+              <input type="radio" name="subj-color" value="#ec4899">
+              <span class="color-dot" style="background-color: #ec4899;"></span>
+            </label>
+            <label class="color-dot-wrapper">
+              <input type="radio" name="subj-color" value="#06b6d4">
+              <span class="color-dot" style="background-color: #06b6d4;"></span>
+            </label>
+            <label class="color-dot-wrapper">
+              <input type="radio" name="subj-color" value="#84cc16">
+              <span class="color-dot" style="background-color: #84cc16;"></span>
+            </label>
+          </div>
+        </div>
+
+        <div class="modal-footer">
+          <button type="button" class="btn btn-text" id="cancel-subject-btn">ยกเลิก</button>
+          <button type="submit" class="btn btn-primary">สร้างวิชา</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- ADD GROUP/ROOM MODAL -->
+  <div class="modal-overlay" id="group-modal">
+    <div class="modal-card small-modal">
+      <div class="modal-header">
+        <h2>สร้างกลุ่มทำการบ้านใหม่</h2>
+        <button class="close-btn" id="close-group-modal-btn"><i class="fa-solid fa-xmark"></i></button>
+      </div>
+      <form id="group-form" class="modal-form">
+        <div class="form-group">
+          <label for="group-name-input">ชื่อกลุ่ม/ห้องเรียน *</label>
+          <input type="text" id="group-name-input" required placeholder="เช่น ม.6/2 สายวิทย์, กลุ่มติวเลข สระบุรี">
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-text" id="cancel-group-btn">ยกเลิก</button>
+          <button type="submit" class="btn btn-primary">สร้างกลุ่ม</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- HOMEWORK DETAIL & DISCUSSION MODAL -->
+  <div class="modal-overlay" id="detail-modal">
+    <div class="modal-card large-modal">
+      <div class="modal-header-detail" id="detail-subject-header">
+        <!-- Colored banner based on subject -->
+        <span class="detail-subject-tag" id="detail-subject-tag">ฟิสิกส์</span>
+        <button class="close-btn-white" id="close-detail-modal-btn"><i class="fa-solid fa-xmark"></i></button>
+      </div>
+      
+      <!-- Mobile Tabs Switcher -->
+      <div class="detail-mobile-tabs" id="detail-mobile-tabs">
+        <button class="detail-tab-btn active" id="btn-detail-tab-info">
+          <i class="fa-solid fa-circle-info"></i> รายละเอียด
+        </button>
+        <button class="detail-tab-btn" id="btn-detail-tab-chat">
+          <i class="fa-regular fa-comments"></i> แชทกลุ่ม (<span id="detail-chat-count-badge">0</span>)
+        </button>
+      </div>
+      
+      <div class="detail-content-wrapper show-info" id="detail-content-wrapper">
+        <!-- Left Side: Task Info -->
+        <div class="detail-info-side">
+          <h2 id="detail-title" class="detail-title">แบบฝึกหัดเรื่องกลศาสตร์หน้า 4-8</h2>
+          
+          <div class="detail-meta-grid">
+            <div class="detail-meta-item">
+              <span class="meta-label">กำหนดส่ง</span>
+              <span class="meta-value" id="detail-due"><i class="fa-regular fa-calendar"></i> 10 ก.ค. 2026, 08:30 น.</span>
+            </div>
+            
+            <div class="detail-meta-item">
+              <span class="meta-label">ความสำคัญ</span>
+              <span class="meta-value" id="detail-priority">🚨 สูงมาก (ด่วน)</span>
+            </div>
+
+            <div class="detail-meta-item">
+              <span class="meta-label">สถานะการทำงาน</span>
+              <div class="detail-status-picker">
+                <select id="detail-status-select" class="custom-select-small">
+                  <option value="todo">ต้องทำ (To Do)</option>
+                  <option value="progress">กำลังทำ (In Progress)</option>
+                  <option value="done">เสร็จสิ้น (Done)</option>
+                </select>
+              </div>
+            </div>
+          </div>
+
+          <div class="detail-description-section">
+            <h3>รายละเอียด & ลิงก์ที่ต้องใช้</h3>
+            <div class="detail-description" id="detail-desc">
+              ไม่มีรายละเอียดเพิ่มเติม
+            </div>
+          </div>
+
+          <div class="detail-assignees-section">
+            <h3>ผู้รับผิดชอบงานนี้</h3>
+            <div class="detail-assignees-list" id="detail-assignees">
+              <!-- Rendered by JS -->
+            </div>
+          </div>
+
+          <!-- Mobile Specific Chat Toggle Button -->
+          <div class="mobile-open-chat-wrapper" id="mobile-open-chat-wrapper">
+            <button type="button" class="btn btn-primary" id="btn-mobile-open-chat">
+              <i class="fa-regular fa-comments"></i> เปิดแชทกลุ่ม / ส่งงานและเฉลย
+            </button>
+          </div>
+
+          <div class="detail-action-buttons">
+            <button id="edit-homework-btn" class="btn btn-secondary"><i class="fa-regular fa-pen-to-square"></i> แก้ไขข้อมูลการบ้าน</button>
+            <button id="delete-homework-btn" class="btn btn-danger"><i class="fa-regular fa-trash-can"></i> ลบการบ้าน</button>
+          </div>
+        </div>
+
+        <!-- Right Side: Real-time Comments Chat & Sharing links -->
+        <div class="detail-chat-side">
+          <div class="chat-header">
+            <h3><i class="fa-regular fa-comments"></i> บันทึก & คุยเรื่องการบ้านกับเพื่อน</h3>
+            <p>แบ่งปันเฉลย แชร์ไฟล์ สรุป หรือปรึกษากันได้ที่นี่</p>
+          </div>
+          
+          <div class="chat-messages-container" id="chat-messages-container">
+            <!-- Messages rendered by JS -->
+          </div>
+
+          <form id="chat-send-form" class="chat-input-wrapper">
+            <div class="chat-input-inner">
+              <input type="text" id="chat-input" placeholder="พิมพ์ข้อความคุยกับเพื่อนในกลุ่ม..." autocomplete="off">
+              <button type="submit" class="btn-send"><i class="fa-solid fa-paper-plane"></i></button>
+            </div>
+            
+            <!-- File attachment simulation -->
+            <div class="chat-attach-bar">
+              <button type="button" id="attach-link-btn" class="btn-attach" title="แนบลิงก์ชีท/Google Drive">
+                <i class="fa-solid fa-link"></i> แนบลิงก์
+              </button>
+              <div id="attached-link-preview" class="attached-link-preview hidden">
+                <span id="attached-link-text"></span>
+                <button type="button" id="remove-attach-btn"><i class="fa-solid fa-circle-xmark"></i></button>
+              </div>
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Attach Link Modal -->
+  <div class="modal-overlay shadow-lvl-3" id="link-attach-modal">
+    <div class="modal-card small-modal">
+      <div class="modal-header">
+        <h2>แนบลิงก์มีประโยชน์</h2>
+        <button class="close-btn" id="close-link-modal-btn"><i class="fa-solid fa-xmark"></i></button>
+      </div>
+      <div class="modal-form">
+        <div class="form-group">
+          <label for="link-url-input">URL ลิงก์ (เช่น Google Drive, Canva, Notion) *</label>
+          <input type="url" id="link-url-input" required placeholder="https://drive.google.com/..." value="https://drive.google.com/">
+        </div>
+        <div class="form-group">
+          <label for="link-label-input">ชื่อป้ายกำกับลิงก์ *</label>
+          <input type="text" id="link-label-input" required placeholder="เช่น ชีทสรุปสูตรฟิสิกส์, สไลด์นำเสนอ" value="แชร์ไฟล์งานกลุ่ม">
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-text" id="cancel-link-btn">ยกเลิก</button>
+          <button type="button" class="btn btn-primary" id="save-link-btn">แนบลิงก์</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- MANAGE USER ACCOUNT MODAL -->
+  <div class="modal-overlay" id="account-modal">
+    <div class="modal-card small-modal">
+      <div class="modal-header">
+        <h2>ตั้งค่าบัญชีผู้ใช้</h2>
+        <button class="close-btn" id="close-account-modal-btn"><i class="fa-solid fa-xmark"></i></button>
+      </div>
+      <form id="account-form" class="modal-form">
+        <div class="form-group">
+          <label>ชื่อผู้ใช้งาน (Username)</label>
+          <input type="text" id="account-username" readonly disabled style="opacity: 0.6; cursor: not-allowed; background: rgba(255,255,255,0.01);">
+        </div>
+
+        <div class="form-group">
+          <label for="account-name">ชื่อเล่น / ชื่อแสดงผล *</label>
+          <input type="text" id="account-name" required placeholder="เช่น อภิญญา">
+        </div>
+
+        <div class="form-group">
+          <label for="account-new-password">เปลี่ยนรหัสผ่านใหม่ (ปล่อยว่างถ้าไม่ต้องการเปลี่ยน)</label>
+          <input type="password" id="account-new-password" placeholder="รหัสผ่านใหม่ขั้นต่ำ 4 ตัว">
+        </div>
+
+        <div class="form-group">
+          <label>เลือกสีประจำตัว (Avatar Color)</label>
+          <div class="color-picker-grid" id="account-color-picker">
+            <label class="color-dot-wrapper">
+              <input type="radio" name="acc-avatar-color" value="#8b5cf6">
+              <span class="color-dot" style="background-color: #8b5cf6;"></span>
+            </label>
+            <label class="color-dot-wrapper">
+              <input type="radio" name="acc-avatar-color" value="#10b981">
+              <span class="color-dot" style="background-color: #10b981;"></span>
+            </label>
+            <label class="color-dot-wrapper">
+              <input type="radio" name="acc-avatar-color" value="#3b82f6">
+              <span class="color-dot" style="background-color: #3b82f6;"></span>
+            </label>
+            <label class="color-dot-wrapper">
+              <input type="radio" name="acc-avatar-color" value="#ec4899">
+              <span class="color-dot" style="background-color: #ec4899;"></span>
+            </label>
+            <label class="color-dot-wrapper">
+              <input type="radio" name="acc-avatar-color" value="#f59e0b">
+              <span class="color-dot" style="background-color: #f59e0b;"></span>
+            </label>
+            <label class="color-dot-wrapper">
+              <input type="radio" name="acc-avatar-color" value="#f43f5e">
+              <span class="color-dot" style="background-color: #f43f5e;"></span>
+            </label>
+            <label class="color-dot-wrapper">
+              <input type="radio" name="acc-avatar-color" value="#06b6d4">
+              <span class="color-dot" style="background-color: #06b6d4;"></span>
+            </label>
+            <label class="color-dot-wrapper">
+              <input type="radio" name="acc-avatar-color" value="#84cc16">
+              <span class="color-dot" style="background-color: #84cc16;"></span>
+            </label>
+          </div>
+        </div>
+
+        <div class="modal-footer flex-column-gap">
+          <div class="account-actions-row">
+            <button type="button" class="btn btn-danger btn-sm" id="delete-account-btn">
+              <i class="fa-solid fa-user-slash"></i> ลบบัญชีผู้ใช้งาน
+            </button>
+            <div class="footer-save-btns">
+              <button type="button" class="btn btn-text" id="cancel-account-btn">ยกเลิก</button>
+              <button type="submit" class="btn btn-primary">บันทึก</button>
+            </div>
+          </div>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Global Toast Notification Container -->
+  <div class="toast-container" id="toast-container"></div>
+
+  <!-- Application logic -->
+  <script src="app.js?v=1.0.3"></script>
+</body>
+</html>
+

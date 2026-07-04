@@ -1,0 +1,15 @@
+{
+  "name": "homework-space",
+  "version": "1.0.0",
+  "description": "Shared Homework Tracking Web Application",
+  "main": "server.js",
+  "type": "commonjs",
+  "scripts": {
+    "dev": "node server.js",
+    "start": "node server.js",
+    "build": "echo 'No build needed'"
+  },
+  "dependencies": {
+    "express": "^4.18.2"
+  }
+}
