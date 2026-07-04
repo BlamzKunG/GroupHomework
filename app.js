@@ -663,6 +663,7 @@ function escapeHTML(str) {
 
 function setupCardEvents() {
   document.querySelectorAll('.hw-card').forEach(card => {
+    // Click event for desktop mouse click
     card.addEventListener('click', (e) => {
       if (e.target.closest('.mini-avatar')) return;
       if (e.target.closest('.hw-card-chat-badge')) return;
@@ -670,13 +671,30 @@ function setupCardEvents() {
       openHomeworkDetails(hwId);
     });
 
-  document.querySelectorAll('.hw-card-chat-badge').forEach(badge => {
-    badge.addEventListener('click', (e) => {
-      e.stopPropagation();
-      const hwId = badge.getAttribute('data-id');
-      openHomeworkDetails(hwId, true);
-    });
-  });
+    // Touch events for mobile to prevent draggable="true" blocking tap clicks
+    let touchStartX = 0;
+    let touchStartY = 0;
+    card.addEventListener('touchstart', (e) => {
+      touchStartX = e.touches[0].clientX;
+      touchStartY = e.touches[0].clientY;
+    }, { passive: true });
+
+    card.addEventListener('touchend', (e) => {
+      const touchEndX = e.changedTouches[0].clientX;
+      const touchEndY = e.changedTouches[0].clientY;
+      
+      // If the movement is very small, treat it as a tap/click
+      if (Math.abs(touchEndX - touchStartX) < 10 && Math.abs(touchEndY - touchStartY) < 10) {
+        if (e.target.closest('.mini-avatar')) return;
+        if (e.target.closest('.hw-card-chat-badge')) {
+          const hwId = card.getAttribute('data-id');
+          openHomeworkDetails(hwId, true);
+          return;
+        }
+        const hwId = card.getAttribute('data-id');
+        openHomeworkDetails(hwId);
+      }
+    }, { passive: true });
 
     card.addEventListener('dragstart', (e) => {
       e.dataTransfer.setData('text/plain', card.getAttribute('data-id'));
@@ -687,6 +705,15 @@ function setupCardEvents() {
     card.addEventListener('dragend', () => {
       card.style.opacity = '1';
       card.classList.remove('dragging');
+    });
+  });
+
+  // Chat badge click event for desktop mouse click
+  document.querySelectorAll('.hw-card-chat-badge').forEach(badge => {
+    badge.addEventListener('click', (e) => {
+      e.stopPropagation();
+      const hwId = badge.getAttribute('data-id');
+      openHomeworkDetails(hwId, true);
     });
   });
 }
