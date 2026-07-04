@@ -1972,7 +1972,8 @@ body {
     display: none !important;
   }
 
-  #detail-modal .modal-card {
+  #detail-modal .modal-card,
+  #group-chat-modal .modal-card {
     height: 85vh !important;
     overflow: hidden !important;
   }

@@ -203,7 +203,11 @@ app.post('/api/groups', (req, res) => {
 // GET /api/homeworks - Get all homeworks
 app.get('/api/homeworks', (req, res) => {
   const db = readDB();
-  res.json(db.homeworks);
+  const homeworksWithCounts = db.homeworks.map(hw => ({
+    ...hw,
+    commentsCount: (db.chats[hw.id] || []).length
+  }));
+  res.json(homeworksWithCounts);
 });
 
 // POST /api/homeworks - Create homework

@@ -143,6 +143,9 @@
           <button id="add-group-btn" class="icon-btn-accent" title="สร้างกลุ่มใหม่">
             <i class="fa-solid fa-plus"></i>
           </button>
+          <button id="open-group-chat-btn" class="icon-btn-accent" title="แชทกลุ่ม" style="margin-left: 6px; background: rgba(139, 92, 246, 0.2); color: #c084fc;">
+            <i class="fa-regular fa-comments"></i>
+          </button>
         </div>
 
         <!-- Right Nav Controls -->
@@ -188,7 +191,12 @@
       <!-- Top Dashboard Header with Statistics -->
       <header class="dashboard-header">
         <div class="dashboard-intro">
-          <h1 id="group-title">กลุ่มเรียนพิเศษ ม.6/1</h1>
+          <div class="title-with-action" style="display: flex; align-items: center; gap: 12px; flex-wrap: wrap;">
+            <h1 id="group-title" style="margin-bottom: 0;">กลุ่มเรียนพิเศษ ม.6/1</h1>
+            <button id="dashboard-group-chat-btn" class="btn btn-primary" style="padding: 6px 14px; font-size: 0.8rem; height: auto; border-radius: 20px; display: inline-flex; align-items: center; gap: 6px;">
+              <i class="fa-regular fa-comments"></i> แชทห้องเรียน
+            </button>
+          </div>
           <p class="subtitle" id="dashboard-user-greeting">จดการบ้าน ร่วมมือกัน และทำเสร็จตรงเวลากับแก๊งเพื่อนของคุณ</p>
         </div>
         
@@ -246,9 +254,9 @@
             
             <select id="filter-priority" class="custom-select-small">
               <option value="all">ทุกระดับความสำคัญ</option>
-              <option value="high">ความสำคัญสูง 🚨</option>
-              <option value="medium">ความสำคัญปานกลาง ⚠️</option>
-              <option value="low">ความสำคัญต่ำ 💤</option>
+              <option value="high">ความสำคัญสูง</option>
+              <option value="medium">ความสำคัญปานกลาง</option>
+              <option value="low">ความสำคัญต่ำ</option>
             </select>
 
             <select id="filter-assignee" class="custom-select-small">
@@ -372,9 +380,9 @@
           <div class="form-group col-6">
             <label for="hw-priority">ความสำคัญ *</label>
             <select id="hw-priority" required>
-              <option value="high">🚨 ความสำคัญสูง (ส่งด่วน)</option>
-              <option value="medium" selected>⚠️ ความสำคัญปานกลาง</option>
-              <option value="low">💤 ความสำคัญต่ำ (ส่งได้เรื่อยๆ)</option>
+              <option value="high">ความสำคัญสูง (ส่งด่วน)</option>
+              <option value="medium" selected>ความสำคัญปานกลาง</option>
+              <option value="low">ความสำคัญต่ำ (ส่งได้เรื่อยๆ)</option>
             </select>
           </div>
         </div>
@@ -589,6 +597,45 @@
               <div id="attached-link-preview" class="attached-link-preview hidden">
                 <span id="attached-link-text"></span>
                 <button type="button" id="remove-attach-btn"><i class="fa-solid fa-circle-xmark"></i></button>
+              </div>
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- GENERAL GROUP CHAT MODAL -->
+  <div class="modal-overlay" id="group-chat-modal">
+    <div class="modal-card large-modal">
+      <div class="modal-header-detail" id="group-chat-header-banner" style="background: var(--primary); padding: 16px 20px; display: flex; justify-content: space-between; align-items: center; border-radius: var(--radius-lg) var(--radius-lg) 0 0;">
+        <span class="detail-subject-tag" id="group-chat-modal-title" style="background: rgba(255, 255, 255, 0.2); font-weight: 700;">แชทกลุ่มคุยงาน</span>
+        <button class="close-btn-white" id="close-group-chat-modal-btn" style="background: none; border: none; color: white; font-size: 1.25rem; cursor: pointer;"><i class="fa-solid fa-xmark"></i></button>
+      </div>
+      <div class="detail-content-wrapper" style="grid-template-columns: 1fr; height: calc(80vh - 60px); overflow: hidden;">
+        <div class="detail-chat-side" style="height: 100%; display: flex; flex-direction: column; overflow: hidden; padding: 20px;">
+          <div class="chat-header">
+            <h3 id="group-chat-title-text"><i class="fa-regular fa-comments"></i> ห้องแชทห้องเรียน</h3>
+            <p>แบ่งปันข้อมูล สอบถามการบ้าน หรือพูดคุยกันภายในกลุ่มได้ที่นี่</p>
+          </div>
+          
+          <div class="chat-messages-container" id="group-chat-messages-container" style="flex: 1; overflow-y: auto; min-height: 0; margin-bottom: 12px;">
+            <!-- Messages rendered by JS -->
+          </div>
+
+          <form id="group-chat-send-form" class="chat-input-wrapper">
+            <div class="chat-input-inner">
+              <input type="text" id="group-chat-input" placeholder="พิมพ์ข้อความคุยกับเพื่อนในกลุ่ม..." autocomplete="off">
+              <button type="submit" class="btn-send"><i class="fa-solid fa-paper-plane"></i></button>
+            </div>
+            
+            <div class="chat-attach-bar">
+              <button type="button" id="group-chat-attach-link-btn" class="btn-attach" title="แนบลิงก์ชีท/Google Drive">
+                <i class="fa-solid fa-link"></i> แนบลิงก์
+              </button>
+              <div id="group-chat-attached-link-preview" class="attached-link-preview hidden">
+                <span id="group-chat-attached-link-text"></span>
+                <button type="button" id="group-chat-remove-attach-btn"><i class="fa-solid fa-circle-xmark"></i></button>
               </div>
             </div>
           </form>

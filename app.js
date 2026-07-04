@@ -19,6 +19,8 @@ let state = {
   activeGroupId: null,
   activeHomeworkId: null,
   activeAttachLink: null,
+  activeGroupAttachLink: null,
+  groupChatOpen: false,
   searchQuery: '',
   filterSubject: 'all',
   filterPriority: 'all',
@@ -33,7 +35,8 @@ let cache = {
   subjectsStr: '',
   homeworksStr: '',
   activitiesStr: '',
-  chatsStr: ''
+  chatsStr: '',
+  groupChatsStr: ''
 };
 
 // Load saved session
@@ -174,6 +177,16 @@ async function syncDataFromServer() {
       }
     }
 
+    // 6. If group chat modal is open, sync group messages
+    if (state.groupChatOpen && state.activeGroupId) {
+      const chats = await fetch(`/api/chats/${state.activeGroupId}`).then(r => r.json());
+      const chatsStr = JSON.stringify(chats);
+      if (chatsStr !== cache.groupChatsStr) {
+        cache.groupChatsStr = chatsStr;
+        renderGroupChatMessages(chats);
+      }
+    }
+
   } catch (error) {
     console.warn('Sync connection timed out. Retrying in next cycle...');
   }
@@ -194,7 +207,7 @@ function detectAndToastNewServerActivities(newHws, oldHws) {
     } else if (oh.status !== nh.status) {
       // Homework status changed by someone else
       if (nh.groupId === state.activeGroupId) {
-        const statusNames = { todo: 'ต้องทำ', progress: 'กำลังทำ', done: 'เสร็จสิ้น 🎉' };
+        const statusNames = { todo: 'ต้องทำ', progress: 'กำลังทำ', done: 'เสร็จสิ้น' };
         showToast('อัปเดตสถานะงานกลุ่ม', `การบ้าน "${nh.title}" ถูกย้ายไปที่ [${statusNames[nh.status]}]`, 'success');
       }
     }
@@ -428,7 +441,7 @@ function renderSidebar() {
     friendsList.innerHTML = state.users.map(u => {
       const isCurrentUser = u.id === state.loggedInUserId;
       const displayName = isCurrentUser ? `${u.name} (คุณ)` : u.name;
-      const statusText = u.status === 'online' ? 'ออนไลน์ 🟢' : 'ออฟไลน์';
+      const statusText = u.status === 'online' ? 'ออนไลน์' : 'ออฟไลน์';
       
       return `
         <div class="friend-item">
@@ -589,12 +602,17 @@ function renderKanbanBoard() {
           <h3>${escapeHTML(hw.title)}</h3>
           <p>${escapeHTML(hw.description || 'ไม่มีรายละเอียดเพิ่มเติม')}</p>
         </div>
-        <div class="hw-card-footer">
-          <span class="hw-due-info ${urgencyClass}">
+        <div class="hw-card-footer" style="display: flex; justify-content: space-between; align-items: center; gap: 8px;">
+          <span class="hw-due-info ${urgencyClass}" style="flex-shrink: 0;">
             <i class="fa-regular fa-clock"></i> ${dateFriendly}
           </span>
-          <div class="hw-assignees">
-            ${assigneesAvatarsHTML}
+          <div style="display: flex; align-items: center; gap: 8px; flex-shrink: 0;">
+            <span class="hw-card-chat-badge" data-id="${hw.id}" title="เปิดคุยงานแชทกลุ่ม" style="cursor: pointer; font-size: 0.75rem; color: var(--text-secondary); background: rgba(255, 255, 255, 0.05); padding: 2px 6px; border-radius: 4px; display: inline-flex; align-items: center; gap: 4px; transition: var(--transition-fast);">
+              <i class="fa-regular fa-comment"></i> ${hw.commentsCount || 0}
+            </span>
+            <div class="hw-assignees" style="margin-top: 0;">
+              ${assigneesAvatarsHTML}
+            </div>
           </div>
         </div>
       </div>
@@ -647,9 +665,18 @@ function setupCardEvents() {
   document.querySelectorAll('.hw-card').forEach(card => {
     card.addEventListener('click', (e) => {
       if (e.target.closest('.mini-avatar')) return;
+      if (e.target.closest('.hw-card-chat-badge')) return;
       const hwId = card.getAttribute('data-id');
       openHomeworkDetails(hwId);
     });
+
+  document.querySelectorAll('.hw-card-chat-badge').forEach(badge => {
+    badge.addEventListener('click', (e) => {
+      e.stopPropagation();
+      const hwId = badge.getAttribute('data-id');
+      openHomeworkDetails(hwId, true);
+    });
+  });
 
     card.addEventListener('dragstart', (e) => {
       e.dataTransfer.setData('text/plain', card.getAttribute('data-id'));
@@ -767,7 +794,7 @@ async function handleHomeworkStatusChange(hwId, newStatus) {
       if (idx !== -1) state.homeworks[idx] = updatedHw;
       cache.homeworksStr = JSON.stringify(state.homeworks);
 
-      const statusTexts = { todo: 'ต้องทำ', progress: 'กำลังทำ', done: 'เสร็จสมบูรณ์ 🎉' };
+      const statusTexts = { todo: 'ต้องทำ', progress: 'กำลังทำ', done: 'เสร็จสมบูรณ์' };
       await logActivityToServer('status', hw.title, `เปลี่ยนสถานะเป็น ${statusTexts[newStatus]}`);
       showToast('อัปเดตสถานะสำเร็จ', `ย้าย "${hw.title}" ไปที่ "${statusTexts[newStatus]}"`, 'success');
       
@@ -796,6 +823,12 @@ document.querySelectorAll('.modal-overlay').forEach(modal => {
   modal.addEventListener('click', (e) => {
     if (e.target === modal) {
       modal.classList.remove('show');
+      if (modal.id === 'group-chat-modal') {
+        state.groupChatOpen = false;
+      }
+      if (modal.id === 'detail-modal') {
+        state.activeHomeworkId = null;
+      }
     }
   });
 });
@@ -952,26 +985,139 @@ function setupModalButtons() {
   document.getElementById('cancel-account-btn').addEventListener('click', () => closeModal('account-modal'));
   document.getElementById('delete-account-btn').addEventListener('click', handleDeleteAccount);
 
+  // Group Chat Modal Triggers
+  const openGroupChat = async () => {
+    if (!state.activeGroupId) {
+      showToast('กรุณาเลือกกลุ่มก่อน', 'ไม่สามารถคุยแชทห้องเรียนได้หากไม่มีกลุ่มการบ้าน', 'warning');
+      return;
+    }
+    const group = state.groups.find(g => g.id === state.activeGroupId);
+    if (!group) return;
+
+    const modalTitle = document.getElementById('group-chat-title-text');
+    if (modalTitle) modalTitle.innerHTML = `<i class="fa-regular fa-comments"></i> ห้องแชทกลุ่ม: ${escapeHTML(group.name)}`;
+    
+    state.groupChatOpen = true;
+
+    try {
+      const chats = await fetch(`/api/chats/${state.activeGroupId}`).then(r => r.json());
+      cache.groupChatsStr = JSON.stringify(chats);
+      renderGroupChatMessages(chats);
+    } catch (err) {
+      console.error('Error fetching group chats:', err);
+    }
+
+    handleRemoveGroupAttachedLink();
+    openModal('group-chat-modal');
+  };
+
+  const btnNavbarGroupChat = document.getElementById('open-group-chat-btn');
+  if (btnNavbarGroupChat) {
+    btnNavbarGroupChat.addEventListener('click', openGroupChat);
+  }
+
+  const btnDashboardGroupChat = document.getElementById('dashboard-group-chat-btn');
+  if (btnDashboardGroupChat) {
+    btnDashboardGroupChat.addEventListener('click', openGroupChat);
+  }
+
+  document.getElementById('close-group-chat-modal-btn').addEventListener('click', () => {
+    closeModal('group-chat-modal');
+    state.groupChatOpen = false;
+  });
+
+  const btnGroupChatAttachLink = document.getElementById('group-chat-attach-link-btn');
+  if (btnGroupChatAttachLink) {
+    btnGroupChatAttachLink.addEventListener('click', () => {
+      document.getElementById('link-url-input').value = 'https://';
+      document.getElementById('link-label-input').value = 'แชร์ลิงก์ส่งงาน/สรุป';
+      openModal('link-attach-modal');
+    });
+  }
+
+  const btnGroupChatRemoveAttach = document.getElementById('group-chat-remove-attach-btn');
+  if (btnGroupChatRemoveAttach) {
+    btnGroupChatRemoveAttach.addEventListener('click', handleRemoveGroupAttachedLink);
+  }
+
+  // POST Group Chat Message
+  const groupChatSendForm = document.getElementById('group-chat-send-form');
+  if (groupChatSendForm) {
+    groupChatSendForm.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const input = document.getElementById('group-chat-input');
+      const text = input.value.trim();
+      
+      if (text === '' && !state.activeGroupAttachLink) return;
+      if (!state.activeGroupId || !state.loggedInUserId) return;
+
+      const payload = {
+        homeworkId: state.activeGroupId,
+        senderId: state.loggedInUserId,
+        text: text || `แชร์ลิงก์: ${state.activeGroupAttachLink.label}`,
+        link: state.activeGroupAttachLink
+      };
+
+      try {
+        const res = await fetch('/api/chats', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(payload)
+        });
+
+        if (res.ok) {
+          const newMsg = await res.json();
+          
+          if (!state.chats[state.activeGroupId]) {
+            state.chats[state.activeGroupId] = [];
+          }
+          state.chats[state.activeGroupId].push(newMsg);
+          cache.groupChatsStr = JSON.stringify(state.chats[state.activeGroupId]);
+
+          const group = state.groups.find(g => g.id === state.activeGroupId);
+          await logActivityToServer('comment', group.name, 'แสดงความคิดเห็นในห้องเรียน');
+          
+          input.value = '';
+          handleRemoveGroupAttachedLink();
+          renderGroupChatMessages(state.chats[state.activeGroupId]);
+        }
+      } catch (err) {
+        showToast('ส่งแชทไม่สำเร็จ', 'ไม่สามารถคุยงานได้ชั่วคราวเนื่องจากปัญหาทางเครือข่าย', 'danger');
+      }
+    });
+  }
+
   document.addEventListener('click', () => {
     profileMenuBtn.classList.remove('open');
   });
 }
 
-async function openHomeworkDetails(hwId) {
+async function openHomeworkDetails(hwId, openChatDirectly = false) {
   const hw = state.homeworks.find(h => h.id === hwId);
   if (!hw) return;
 
   state.activeHomeworkId = hwId;
   
-  // Reset mobile tabs to default (Details tab active)
+  // Reset mobile tabs based on selection
   const btnTabInfo = document.getElementById('btn-detail-tab-info');
   const btnTabChat = document.getElementById('btn-detail-tab-chat');
   const detailWrapper = document.getElementById('detail-content-wrapper');
   if (btnTabInfo && btnTabChat && detailWrapper) {
-    btnTabInfo.classList.add('active');
-    btnTabChat.classList.remove('active');
-    detailWrapper.classList.add('show-info');
-    detailWrapper.classList.remove('show-chat');
+    if (openChatDirectly) {
+      btnTabChat.classList.add('active');
+      btnTabInfo.classList.remove('active');
+      detailWrapper.classList.add('show-chat');
+      detailWrapper.classList.remove('show-info');
+      setTimeout(() => {
+        const container = document.getElementById('chat-messages-container');
+        if (container) container.scrollTop = container.scrollHeight;
+      }, 50);
+    } else {
+      btnTabInfo.classList.add('active');
+      btnTabChat.classList.remove('active');
+      detailWrapper.classList.add('show-info');
+      detailWrapper.classList.remove('show-chat');
+    }
   }
   
   const subject = getSubject(hw.subjectId);
@@ -984,7 +1130,7 @@ async function openHomeworkDetails(hwId) {
   const formattedDue = formatFriendlyDeadline(hw.dueDate, hw.dueTime);
   document.getElementById('detail-due').innerHTML = `<i class="fa-regular fa-calendar"></i> กำหนดส่ง: ${formattedDue}`;
 
-  const prioLabels = { high: '🚨 สูงมาก (ส่งด่วน)', medium: '⚠️ ปานกลาง', low: '💤 ต่ำ' };
+  const prioLabels = { high: 'สูงมาก (ส่งด่วน)', medium: 'ปานกลาง', low: 'ต่ำ' };
   const detailPriority = document.getElementById('detail-priority');
   detailPriority.textContent = prioLabels[hw.priority];
   detailPriority.className = `meta-value prio-${hw.priority}`;
@@ -1112,12 +1258,19 @@ function handleSaveAttachedLink() {
     return;
   }
 
-  state.activeAttachLink = { url, label };
-  
-  const previewDiv = document.getElementById('attached-link-preview');
-  const previewText = document.getElementById('attached-link-text');
-  previewText.textContent = `📎 ${label}`;
-  previewDiv.classList.remove('hidden');
+  if (state.groupChatOpen) {
+    state.activeGroupAttachLink = { url, label };
+    const previewDiv = document.getElementById('group-chat-attached-link-preview');
+    const previewText = document.getElementById('group-chat-attached-link-text');
+    if (previewText) previewText.textContent = `📎 ${label}`;
+    if (previewDiv) previewDiv.classList.remove('hidden');
+  } else {
+    state.activeAttachLink = { url, label };
+    const previewDiv = document.getElementById('attached-link-preview');
+    const previewText = document.getElementById('attached-link-text');
+    if (previewText) previewText.textContent = `📎 ${label}`;
+    if (previewDiv) previewDiv.classList.remove('hidden');
+  }
   
   closeModal('link-attach-modal');
 }
@@ -1126,6 +1279,63 @@ function handleRemoveAttachedLink() {
   state.activeAttachLink = null;
   const previewDiv = document.getElementById('attached-link-preview');
   if (previewDiv) previewDiv.classList.add('hidden');
+}
+
+function handleRemoveGroupAttachedLink() {
+  state.activeGroupAttachLink = null;
+  const previewDiv = document.getElementById('group-chat-attached-link-preview');
+  if (previewDiv) previewDiv.classList.add('hidden');
+}
+
+function renderGroupChatMessages(msgs = []) {
+  const container = document.getElementById('group-chat-messages-container');
+  if (!container || !state.activeGroupId) return;
+
+  if (msgs.length === 0) {
+    container.innerHTML = `
+      <div style="text-align: center; color: var(--text-muted); font-size: 0.85rem; padding: 32px 16px;">
+        <i class="fa-regular fa-comment-dots" style="font-size: 2rem; margin-bottom: 8px; display: block; opacity: 0.5;"></i>
+        ยังไม่มีการพูดคุยกันในห้องเรียนนี้<br>ส่งข้อความทักทาย แชร์ไฟล์การเรียน หรือพูดคุยกับเพื่อนเลย!
+      </div>
+    `;
+    return;
+  }
+
+  let messagesHTML = '';
+  msgs.forEach(m => {
+    const isMine = m.senderId === state.loggedInUserId;
+    const sender = getUser(m.senderId);
+    const bubbleClass = isMine ? 'mine' : '';
+    const sentTime = formatChatTime(m.timestamp);
+
+    let linkHTML = '';
+    if (m.link && m.link.url) {
+      linkHTML = `
+        <a href="${m.link.url}" target="_blank" class="chat-msg-link">
+          <i class="fa-solid fa-link"></i> ${escapeHTML(m.link.label || 'เปิดลิงก์ที่แนบ')}
+        </a>
+      `;
+    }
+
+    messagesHTML += `
+      <div class="chat-bubble ${bubbleClass}">
+        <div class="chat-bubble-avatar" style="background-color: ${sender.avatarColor}; display:flex; align-items:center; justify-content:center; color:white; font-size: 0.8rem; font-weight:700;">
+          ${sender.name.charAt(0)}
+        </div>
+        <div class="chat-bubble-content">
+          <span class="chat-sender-name">${sender.name}</span>
+          <div class="chat-msg-text-wrapper">
+            <div>${escapeHTML(m.text)}</div>
+            ${linkHTML}
+          </div>
+          <span class="chat-msg-time">${sentTime} น.</span>
+        </div>
+      </div>
+    `;
+  });
+
+  container.innerHTML = messagesHTML;
+  container.scrollTop = container.scrollHeight;
 }
 
 function handleNotifClick(hwId, notifId) {
