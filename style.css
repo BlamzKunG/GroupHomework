@@ -2024,11 +2024,177 @@ body {
     font-size: 0.95rem;
     background: var(--primary);
   }
+
+  /* Hide stats board on mobile to prioritize Kanban board */
+  .stats-board {
+    display: none !important;
+  }
+
+  /* Compact dashboard intro on mobile */
+  .dashboard-header {
+    margin-bottom: 12px !important;
+  }
+  .dashboard-intro h1 {
+    font-size: 1.35rem !important;
+  }
+  .dashboard-intro .subtitle {
+    font-size: 0.8rem !important;
+    margin-top: 4px !important;
+  }
+  #dashboard-group-chat-btn {
+    padding: 6px 12px !important;
+    font-size: 0.75rem !important;
+  }
+
+  /* Compact toolbar on mobile */
+  .toolbar {
+    padding: 10px !important;
+    gap: 8px !important;
+    margin-bottom: 16px !important;
+    border-radius: var(--radius-md) !important;
+  }
+  .search-filter-wrapper {
+    gap: 6px !important;
+  }
+  .filters {
+    gap: 4px !important;
+  }
+  .search-box input {
+    padding: 8px 12px 8px 34px !important;
+    font-size: 0.8rem !important;
+  }
+  .search-box i {
+    left: 12px !important;
+    font-size: 0.85rem !important;
+  }
+  .custom-select-small {
+    padding: 6px 10px !important;
+    font-size: 0.75rem !important;
+    border-radius: var(--radius-sm) !important;
+  }
+  .icon-btn-accent {
+    width: 32px !important;
+    height: 32px !important;
+    font-size: 0.8rem !important;
+  }
+
+  /* Compact Kanban Columns and Cards on mobile */
+  .kanban-board {
+    gap: 12px !important;
+  }
+  .kanban-column {
+    padding: 10px !important;
+    gap: 10px !important;
+    min-height: 200px !important;
+  }
+  .column-header {
+    padding-bottom: 8px !important;
+  }
+  .column-header h2 {
+    font-size: 0.9rem !important;
+  }
+  .card-list {
+    gap: 10px !important;
+  }
+  .hw-card {
+    padding: 10px !important;
+    border-radius: var(--radius-md) !important;
+  }
+  .hw-card-body h3 {
+    font-size: 0.9rem !important;
+  }
+  .hw-card-body p {
+    font-size: 0.75rem !important;
+    margin-top: 4px !important;
+  }
+  .hw-card-footer {
+    margin-top: 8px !important;
+    padding-top: 8px !important;
+  }
+  .hw-due-info {
+    font-size: 0.7rem !important;
+  }
 }
 
 /* Fallback/Default for Desktop to hide Mobile elements */
 .detail-mobile-tabs,
 .mobile-open-chat-wrapper {
   display: none;
+}
+
+/* Premium Chat Enhancements */
+.chat-bubble.mine .chat-msg-text-wrapper {
+  background: linear-gradient(135deg, var(--primary) 0%, #6366f1 100%) !important;
+  border: none !important;
+  box-shadow: 0 4px 12px rgba(139, 92, 246, 0.25) !important;
+  color: white !important;
+  border-radius: 16px 4px 16px 16px !important;
+}
+
+.chat-msg-text-wrapper {
+  background: rgba(255, 255, 255, 0.04) !important;
+  backdrop-filter: blur(10px) !important;
+  -webkit-backdrop-filter: blur(10px) !important;
+  border: 1px solid rgba(255, 255, 255, 0.08) !important;
+  padding: 10px 14px !important;
+  border-radius: 4px 16px 16px 16px !important;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1) !important;
+}
+
+.chat-input-inner input {
+  flex: 1;
+  background: rgba(255, 255, 255, 0.03) !important;
+  border: 1px solid rgba(255, 255, 255, 0.1) !important;
+  padding: 12px 16px !important;
+  border-radius: 24px !important;
+  color: var(--text-primary);
+  font-family: var(--font-family);
+  font-size: 0.85rem;
+  outline: none;
+  transition: var(--transition-fast);
+}
+
+.chat-input-inner input:focus {
+  border-color: var(--primary) !important;
+  background: rgba(255, 255, 255, 0.06) !important;
+  box-shadow: 0 0 10px rgba(139, 92, 246, 0.2) !important;
+}
+
+.btn-send {
+  background: linear-gradient(135deg, var(--primary) 0%, #6366f1 100%) !important;
+  border: none !important;
+  color: white !important;
+  width: 40px !important;
+  height: 40px !important;
+  border-radius: 50% !important;
+  cursor: pointer;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  transition: var(--transition-fast) !important;
+  flex-shrink: 0 !important;
+  box-shadow: 0 4px 10px rgba(139, 92, 246, 0.3) !important;
+}
+
+.btn-send:hover {
+  transform: scale(1.05) !important;
+  box-shadow: 0 6px 14px rgba(139, 92, 246, 0.4) !important;
+}
+
+#detail-chat-count-badge {
+  background: rgba(139, 92, 246, 0.2);
+  color: #c084fc;
+  font-size: 0.75rem;
+  padding: 2px 6px;
+  border-radius: 10px;
+  font-weight: 700;
+  margin-left: 4px;
+  border: 1px solid rgba(139, 92, 246, 0.3);
+}
+.detail-tab-btn.active #detail-chat-count-badge {
+  background: var(--primary);
+  color: white;
+  border-color: transparent;
+  box-shadow: 0 2px 8px rgba(139, 92, 246, 0.4);
 }
 

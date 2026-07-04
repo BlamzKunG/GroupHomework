@@ -1808,6 +1808,11 @@ function setupFormSubmitListeners() {
         cache.chatsStr = JSON.stringify(state.chats[state.activeHomeworkId]);
 
         const hw = state.homeworks.find(h => h.id === state.activeHomeworkId);
+        if (hw) {
+          hw.commentsCount = (hw.commentsCount || 0) + 1;
+          cache.homeworksStr = JSON.stringify(state.homeworks);
+          renderKanbanBoard();
+        }
         await logActivityToServer('comment', hw.title, 'แสดงความคิดเห็นคุยงานกลุ่ม');
         
         input.value = '';
